@@ -63,6 +63,37 @@ const generateHash = (content) => {
 
 // --- ROUTES ---
 
+// Root route - API Documentation
+app.get('/', (req, res) => {
+    res.json({
+        name: 'AuthAI.pro API',
+        version: '1.0.0',
+        status: 'online',
+        endpoints: {
+            health: '/api/health',
+            auth: {
+                login: 'POST /api/auth/login',
+                register: 'POST /api/auth/register',
+                profile: 'GET /api/user/profile/:email'
+            },
+            payment: {
+                createOrder: 'POST /api/payment/create-order',
+                verify: 'POST /api/payment/verify'
+            },
+            certificates: {
+                mint: 'POST /api/certificate/mint',
+                get: 'GET /api/certificate/:id'
+            },
+            analysis: {
+                submit: 'POST /api/analyze',
+                status: 'GET /api/job/:id'
+            }
+        },
+        documentation: 'https://authai.pro',
+        timestamp: new Date().toISOString()
+    });
+});
+
 // 0. Health Check
 app.get('/api/health', (req, res) => {
     res.json({ status: 'online', timestamp: new Date().toISOString() });
