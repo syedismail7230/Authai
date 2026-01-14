@@ -35,9 +35,11 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess,
             return;
         }
 
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
         // 2. Create Order on Backend
         try {
-            const orderRes = await fetch('http://localhost:3001/api/payment/create-order', {
+            const orderRes = await fetch(`${API_URL}/payment/create-order`, {
                 method: 'POST',
                 body: JSON.stringify({ amount: 199, currency: 'INR' }),
                 headers: { 'Content-Type': 'application/json' }
@@ -48,7 +50,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess,
 
             // 3. Open Razorpay Options
             const options = {
-                key: "rzp_live_RQuwNOxotGRMaW", // Ideally from ENV, but hardcoded for now as per request
+                key: "rzp_live_RQuwNOxotGRMaW",
                 amount: orderData.amount,
                 currency: orderData.currency,
                 name: "AuthAI.pro",
@@ -57,7 +59,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onSuccess,
                 order_id: orderData.id,
                 handler: async function (response: any) {
                     // 4. Verify Payment on Backend
-                    const verifyRes = await fetch('http://localhost:3001/api/payment/verify', {
+                    const verifyRes = await fetch(`${API_URL}/payment/verify`, {
                         method: 'POST',
                         body: JSON.stringify({
                             razorpay_order_id: response.razorpay_order_id,
