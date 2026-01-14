@@ -2,7 +2,7 @@
 import { AnalysisResult, CertificateData, ContentType } from '../types';
 import { supabase } from './supabaseClient';
 
-const API_URL = 'http://localhost:3001/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 const mockDelay = (ms: number) => new Promise(resolve => setTimeout(resolve, process.env.NODE_ENV === 'test' ? 10 : ms));
 
