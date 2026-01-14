@@ -4,14 +4,14 @@ import { supabase } from './supabaseClient';
 
 const API_URL = 'http://localhost:3001/api';
 
-const mockDelay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const mockDelay = (ms: number) => new Promise(resolve => setTimeout(resolve, process.env.NODE_ENV === 'test' ? 10 : ms));
 
+// --- AUTH API ---
 // --- AUTH API ---
 export const loginUser = async (email: string, password: string) => {
     try {
-        // Short timeout for auth check to fail fast if backend is down
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
 
         const res = await fetch(`${API_URL}/auth/login`, {
             method: 'POST',
@@ -21,74 +21,137 @@ export const loginUser = async (email: string, password: string) => {
         });
         clearTimeout(timeoutId);
 
-        if (!res.ok) throw new Error('Authentication Failed');
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || 'Authentication Failed');
+        }
         return res.json();
     } catch (error) {
-        console.warn("Backend unavailable, utilizing offline fallback for Auth:", error);
-        
-        // Mock Fallback Logic
-        await mockDelay(1000);
-        
-        // Simple mock auth logic for demo purposes
-        if (password) {
-             const isAdmin = email.toLowerCase().includes('admin');
-             return {
-                 token: 'mock-offline-token-' + Date.now(),
-                 user: { email, isAdmin }
-             };
-        }
-        throw new Error('Offline Auth Failed: Invalid Credentials');
+        console.warn("Backend unavailable:", error);
+        throw error;
     }
 };
 
-// --- ANALYSIS API ---
-export const analyzeContent = async (content: string, type: string): Promise<AnalysisResult> => {
-  try {
-    const response = await fetch(`${API_URL}/analyze`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content, type })
-    });
+export const registerUser = async (email: string, password: string) => {
+    try {
+        const res = await fetch(`${API_URL}/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
 
-    if (!response.ok) {
-        const err = await response.json().catch(() => ({}));
-        throw new Error(err.error || "Server analysis failed");
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || 'Registration Failed');
+        }
+        return res.json();
+    } catch (error) {
+        throw error;
     }
+};
 
-    return await response.json();
+export const getUserProfile = async (email: string) => {
+    try {
+        const res = await fetch(`${API_URL}/user/profile/${email}`);
+        if (!res.ok) throw new Error("Failed to fetch profile");
+        return res.json();
+    } catch (error) {
+        console.warn("Fetch profile error:", error);
+        return null;
+    }
+};
 
-  } catch (error) {
-    console.error("Backend Connection Error:", error);
-    
-    // Fallback Mock if Backend is offline
-    await mockDelay(2000);
-    
-    return {
-      verdict: 'AI_GENERATED',
-      confidenceScore: 94.5,
-      perplexityScore: 18,
-      burstinessScore: 12,
-      entropyScore: 24,
-      aiProbability: 94.5,
-      humanProbability: 5.5,
-      detectedPatterns: ["OFFLINE_MODE_ACTIVE", "SYNTHETIC_TEXTURE_MATCH", "LOW_BURSTINESS"],
-      forensicLogs: [
-        { id: "ERR_CONN", timestamp: new Date().toISOString(), action: "CONNECT_BACKEND_NODE_882", status: "CRITICAL" },
-        { id: "FALLBACK", timestamp: new Date().toISOString(), action: "LOCAL_HEURISTIC_ENGINE", status: "OK" }
-      ],
-      contentHash: "OFFLINE-" + Math.random().toString(36).substr(2, 9).toUpperCase()
-    };
-  }
+// --- ANALYSIS API (Async Job Queue Pattern with Rule-Based Logic) ---
+import { io } from "socket.io-client";
+
+const socket = io('http://localhost:3001');
+
+// --- ANALYSIS API (Real-Time WebSocket Pattern) ---
+export const analyzeContent = async (content: string, type: string): Promise<AnalysisResult> => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            // 1. Submit Job via HTTP to get ID
+            const startResponse = await fetch(`${API_URL}/analyze`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content, type })
+            });
+
+            if (!startResponse.ok) {
+                const err = await startResponse.json().catch(() => ({}));
+                reject(new Error(err.error || "Failed to start analysis job"));
+                return;
+            }
+
+            const { jobId } = await startResponse.json();
+            console.log(`Job Started: ${jobId}, Connecting WebSocket...`);
+
+            // 2. Subscribe to Real-time Updates
+            socket.emit('join_job', jobId);
+
+            const cleanup = () => {
+                socket.off('job_complete');
+                socket.off('job_error');
+                socket.off('job_update');
+            };
+
+            // Optional: You could expose a callback for progress updates here if the UI supported it.
+            socket.on('job_update', (data) => {
+                if (data.jobId === jobId) {
+                    console.log(`Job Progress: ${data.progress}% - ${data.message || ''}`);
+                    // Potentially dispatch to a store or context if needed
+                }
+            });
+
+            socket.on('job_complete', (result) => {
+                if (result.contentHash || result.verdict) { // Basic validation
+                    cleanup();
+                    resolve(result);
+                }
+            });
+
+            socket.on('job_error', (err) => {
+                cleanup();
+                reject(new Error(err.error || "Socket Analysis Error"));
+            });
+
+            // Fallback Timeout (30s)
+            setTimeout(() => {
+                cleanup();
+                reject(new Error("Analysis Timed Out (Socket)"));
+            }, 30000);
+
+        } catch (error) {
+            console.error("Analysis Error:", error);
+            // Fallback Mock if Backend is offline
+            await mockDelay(2000);
+            resolve({
+                verdict: 'AI_GENERATED',
+                confidenceScore: 94.5,
+                perplexityScore: 18,
+                burstinessScore: 12,
+                entropyScore: 24,
+                aiProbability: 94.5,
+                humanProbability: 5.5,
+                detectedPatterns: ["OFFLINE_MODE_ACTIVE", "SYNTHETIC_TEXTURE_MATCH", "LOW_BURSTINESS"],
+                forensicLogs: [
+                    { id: "ERR_CONN", timestamp: new Date().toISOString(), action: "CONNECT_BACKEND_NODE_882", status: "CRITICAL" },
+                    { id: "FALLBACK", timestamp: new Date().toISOString(), action: "LOCAL_HEURISTIC_ENGINE", status: "OK" }
+                ],
+                contentHash: "OFFLINE-" + Math.random().toString(36).substr(2, 9).toUpperCase()
+            });
+        }
+    });
 };
 
 // --- CERTIFICATE API ---
 export const mintCertificate = async (
-    analysisResult: AnalysisResult, 
-    content: string, 
-    contentType: ContentType, 
+    analysisResult: AnalysisResult,
+    content: string,
+    contentType: ContentType,
     owner: string
 ): Promise<CertificateData> => {
-    
+
     const id = `AUTH-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
     const certPayload = {
         id,
@@ -132,10 +195,10 @@ export const mintCertificate = async (
                     contentPreview: data.content_preview,
                     contentType: data.content_type as ContentType
                 };
-                
+
                 // Cache locally
-                try { localStorage.setItem(`cert_${mappedCert.id}`, JSON.stringify(mappedCert)); } catch(e){}
-                
+                try { localStorage.setItem(`cert_${mappedCert.id}`, JSON.stringify(mappedCert)); } catch (e) { }
+
                 return mappedCert;
             }
         } catch (dbError) {
@@ -152,14 +215,14 @@ export const mintCertificate = async (
         });
 
         if (response.ok) {
-             const cert = await response.json();
-             try { localStorage.setItem(`cert_${cert.id}`, JSON.stringify(cert)); } catch(e){}
-             return cert;
+            const cert = await response.json();
+            try { localStorage.setItem(`cert_${cert.id}`, JSON.stringify(cert)); } catch (e) { }
+            return cert;
         }
     } catch (error) {
         console.warn("Backend Minting unavailable:", error);
     }
-    
+
     // 3. Offline Mock Fallback
     await mockDelay(1500);
     const offlineCert = {
@@ -171,14 +234,14 @@ export const mintCertificate = async (
     try {
         localStorage.setItem(`cert_${offlineCert.id}`, JSON.stringify(offlineCert));
     } catch (e) {
-         console.warn("Local cache failed:", e);
+        console.warn("Local cache failed:", e);
     }
 
     return offlineCert;
 };
 
 export const verifyCertificate = async (id: string): Promise<CertificateData> => {
-    
+
     // 1. Try Supabase (Source of Truth)
     if (supabase) {
         try {
@@ -189,7 +252,7 @@ export const verifyCertificate = async (id: string): Promise<CertificateData> =>
                 .single();
 
             if (data && !error) {
-                 return {
+                return {
                     id: data.id,
                     issueDate: data.issue_date,
                     contentHash: data.content_hash,
@@ -221,7 +284,7 @@ export const verifyCertificate = async (id: string): Promise<CertificateData> =>
         return await response.json();
     } catch (error) {
         console.warn("Backend unavailable, checking fallback:", error);
-        
+
         if (id.startsWith('AUTH-DEMO') || id.startsWith('AUTH')) {
             await mockDelay(1000);
             return {
