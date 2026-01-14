@@ -63,12 +63,6 @@ const generateHash = (content) => {
 
 // --- ROUTES ---
 
-import { db } from './localDb.js';
-
-// ... (previous setup)
-
-// --- ROUTES ---
-
 // 0. Health Check
 app.get('/api/health', (req, res) => {
     res.json({ status: 'online', timestamp: new Date().toISOString() });
@@ -80,20 +74,17 @@ app.post('/api/auth/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         
-        const user = db.users.findEmail(email);
+        const { data: user, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', email)
+            .single();
 
-        if (!user) {
+        if (error || !user) {
              return res.status(401).json({ error: 'Invalid credentials' });
         }
 
-        // Handle Admin special case (plain text for demo simplicity, or bcrypt)
-        let validPassword = false;
-        if (user.password_hash.startsWith('$')) {
-             validPassword = await bcrypt.compare(password, user.password_hash);
-        } else {
-             validPassword = (password === user.password_hash);
-        }
-
+        const validPassword = await bcrypt.compare(password, user.password_hash);
         if (!validPassword) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
@@ -125,34 +116,34 @@ app.post('/api/auth/register', async (req, res) => {
     try {
         const { email, password } = req.body;
         
-        const existing = db.users.findEmail(email);
-        if (existing) {
-            return res.status(400).json({ error: 'User already exists' });
-        }
-
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        const newUser = {
-            id: crypto.randomUUID(),
-            email,
-            password_hash: hashedPassword,
-            role: 'USER',
-            credits: 5,
-            created_at: new Date().toISOString()
-        };
+        const { data, error } = await supabase
+            .from('users')
+            .insert([{ 
+                email, 
+                password_hash: hashedPassword,
+                role: 'USER',
+                credits: 5
+            }])
+            .select()
+            .single();
 
-        db.users.create(newUser);
+        if (error) {
+            if(error.code === '23505') return res.status(400).json({ error: 'User already exists' });
+            throw error;
+        }
 
-        const token = jwt.sign({ id: newUser.id, email: newUser.email, role: newUser.role }, JWT_SECRET, { expiresIn: '24h' });
+        const token = jwt.sign({ id: data.id, email: data.email, role: data.role }, JWT_SECRET, { expiresIn: '24h' });
 
         res.status(201).json({ 
             token, 
             user: { 
-                id: newUser.id, 
-                email: newUser.email, 
-                role: newUser.role, 
-                credits: newUser.credits 
+                id: data.id, 
+                email: data.email, 
+                role: data.role, 
+                credits: data.credits 
             } 
         });
 
@@ -165,21 +156,25 @@ app.post('/api/auth/register', async (req, res) => {
 // C. Get Profile
 app.get('/api/user/profile/:email', async (req, res) => {
     try {
-        const user = db.users.findEmail(req.params.email);
-        if (!user) throw new Error("User not found");
-        res.json(user);
+        const { data, error } = await supabase
+            .from('users')
+            .select('id, email, role, credits, created_at')
+            .eq('email', req.params.email)
+            .single();
+            
+        if (error) throw error;
+        res.json(data);
     } catch (e) {
         res.status(404).json({ error: "User not found" });
     }
 });
 
-// ... (Payment Routes)
-
+// 1.5 Payment Routes
 app.post('/api/payment/create-order', async (req, res) => {
     const { amount, currency } = req.body;
     try {
         const options = {
-            amount: amount * 100, // Razorpay works in subunits (paise)
+            amount: amount * 100,
             currency: currency || "INR",
             receipt: "receipt_" + Date.now(),
         };
@@ -210,18 +205,23 @@ app.post('/api/payment/verify', async (req, res) => {
     } catch(e) {
         console.warn("Signature verification failed/error", e);
     }
-    
-    // Allow Bypass for Testing if needed (Optional: Remove for strict prod)
-    // isValid = true; 
 
-    if (isValid || process.env.NODE_ENV === 'development') { // Strict in prod
+    if (isValid || process.env.NODE_ENV === 'development') {
         console.log(`[PAYMENT] Signature Valid. Updating Credits for ${email}...`);
-        // Add Credits to User in DB
+        
         if (email) {
-            const user = db.users.findEmail(email);
+            const { data: user } = await supabase
+                .from('users')
+                .select('credits')
+                .eq('email', email)
+                .single();
+                
             if (user) {
-                console.log(`[PAYMENT] User found: ${user.email}. Current Credits: ${user.credits}`);
-                db.users.updateCredits(email, user.credits + 10);
+                console.log(`[PAYMENT] User found: ${email}. Current Credits: ${user.credits}`);
+                await supabase
+                    .from('users')
+                    .update({ credits: user.credits + 10 })
+                    .eq('email', email);
                 console.log(`[PAYMENT] Credits Updated to ${user.credits + 10}`);
             } else {
                 console.warn(`[PAYMENT] User ${email} NOT found in DB.`);
@@ -236,28 +236,46 @@ app.post('/api/payment/verify', async (req, res) => {
     }
 });
 
-// ... (Certificate Minting Route for Backend Fallback)
-app.post('/api/certificate/mint', (req, res) => {
+// Certificate Minting
+app.post('/api/certificate/mint', async (req, res) => {
     const { analysisResult, content, contentType, owner } = req.body;
     const cert = {
         id: `AUTH-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
-        issueDate: new Date().toISOString(),
-        contentHash: analysisResult.contentHash,
+        issue_date: new Date().toISOString(),
+        content_hash: analysisResult.contentHash,
         owner,
         verdict: analysisResult.verdict,
-        contentPreview: content,
-        contentType,
+        content_preview: content.substring(0, 200),
+        content_type: contentType,
         metadata: analysisResult
     };
     
-    db.certificates.create(cert);
-    res.json(cert);
+    const { data, error } = await supabase
+        .from('certificates')
+        .insert([cert])
+        .select()
+        .single();
+        
+    if (error) {
+        console.error("Certificate minting error:", error);
+        return res.status(500).json({ error: "Failed to mint certificate" });
+    }
+    
+    res.json(data);
 });
 
-app.get('/api/certificate/:id', (req, res) => {
-    const cert = db.certificates.findById(req.params.id);
-    if(cert) res.json(cert);
-    else res.status(404).json({error: "Not Found"});
+app.get('/api/certificate/:id', async (req, res) => {
+    const { data, error } = await supabase
+        .from('certificates')
+        .select('*')
+        .eq('id', req.params.id)
+        .single();
+        
+    if (error || !data) {
+        return res.status(404).json({ error: "Certificate not found" });
+    }
+    
+    res.json(data);
 });
 
 // --- ASYNC JOB QUEUE (In-Memory Mock for Production Simulation) ---
