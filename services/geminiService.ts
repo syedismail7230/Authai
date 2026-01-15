@@ -115,16 +115,16 @@ export const analyzeContent = async (content: string, type: string): Promise<Ana
                 reject(new Error(err.error || "Socket Analysis Error"));
             });
 
-            // Fallback Timeout (30s)
+            // Fallback Timeout (60s for AI analysis)
             setTimeout(() => {
                 cleanup();
                 reject(new Error("Analysis Timed Out (Socket)"));
-            }, 30000);
+            }, 60000);
 
         } catch (error) {
             console.error("Analysis Error:", error);
             // Fallback Mock if Backend is offline
-            await mockDelay(2000);
+            await mockDelay(500);
             resolve({
                 verdict: 'AI_GENERATED',
                 confidenceScore: 94.5,

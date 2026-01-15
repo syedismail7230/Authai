@@ -54,35 +54,10 @@
     }
   }
   </script>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind CSS will be bundled via PostCSS -->
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Roboto+Mono:wght@400;700&display=swap"
     rel="stylesheet">
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            mono: ['Roboto Mono', 'monospace'],
-          },
-          colors: {
-            'neo-white': '#ffffff',
-            'neo-black': '#000000',
-            'neo-red': '#ff4d4d',
-            'neo-green': '#00cc66',
-            'neo-yellow': '#ffcc00',
-            'neo-grey': '#f0f0f0',
-          },
-          boxShadow: {
-            'neo': '8px 8px 0px 0px rgba(0,0,0,1)',
-            'neo-sm': '4px 4px 0px 0px rgba(0,0,0,1)',
-            'neo-hover': '2px 2px 0px 0px rgba(0,0,0,1)',
-          }
-        }
-      }
-    }
-  </script>
   <style>
     body {
       background-color: #f8f8f8;
