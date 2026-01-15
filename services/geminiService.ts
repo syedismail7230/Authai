@@ -3,6 +3,7 @@ import { AnalysisResult, CertificateData, ContentType } from '../types';
 import { supabase } from './supabaseClient';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const SOCKET_URL = API_URL.replace(/\/api$/, '');
 
 const mockDelay = (ms: number) => new Promise(resolve => setTimeout(resolve, process.env.NODE_ENV === 'test' ? 10 : ms));
 
@@ -64,7 +65,7 @@ export const getUserProfile = async (email: string) => {
 // --- ANALYSIS API (Async Job Queue Pattern with Rule-Based Logic) ---
 import { io } from "socket.io-client";
 
-const socket = io('http://localhost:3001');
+const socket = io(SOCKET_URL);
 
 // --- ANALYSIS API (Real-Time WebSocket Pattern) ---
 export const analyzeContent = async (content: string, type: string): Promise<AnalysisResult> => {
