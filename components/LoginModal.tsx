@@ -68,7 +68,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin }) => 
                     </p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-8 space-y-6">
+                <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6">
                     {error && (
                         <div className="bg-neo-red/10 border-l-4 border-neo-red p-3 flex items-start gap-2 text-neo-red text-sm font-bold animate-pulse">
                             <ShieldAlert size={16} className="shrink-0 mt-0.5" />

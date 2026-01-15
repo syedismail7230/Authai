@@ -31,7 +31,7 @@ const AnalysisDashboard: React.FC<AnalysisDashboardProps> = ({ data, onCertify, 
           <div className="flex justify-between items-start mb-4">
             <div>
               <p className="font-mono text-sm opacity-80 mb-1">FINAL VERDICT</p>
-              <h2 className="text-3xl sm:text-4xl lg:text-6xl font-black tracking-tighter uppercase break-words">{data.verdict.replace('_', ' ')}</h2>
+              <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase">{data.verdict.replace('_', ' ')}</h2>
             </div>
             {data.verdict === 'HUMAN' ? <CheckCircle size={48} /> : <AlertTriangle size={48} />}
           </div>
