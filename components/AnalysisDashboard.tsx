@@ -23,7 +23,7 @@ const AnalysisDashboard: React.FC<AnalysisDashboardProps> = ({ data, onCertify, 
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      
+
       {/* Top Section: Verdict & Score */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Verdict Card */}
@@ -31,7 +31,7 @@ const AnalysisDashboard: React.FC<AnalysisDashboardProps> = ({ data, onCertify, 
           <div className="flex justify-between items-start mb-4">
             <div>
               <p className="font-mono text-sm opacity-80 mb-1">FINAL VERDICT</p>
-              <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase">{data.verdict.replace('_', ' ')}</h2>
+              <h2 className="text-3xl sm:text-4xl lg:text-6xl font-black tracking-tighter uppercase break-words">{data.verdict.replace('_', ' ')}</h2>
             </div>
             {data.verdict === 'HUMAN' ? <CheckCircle size={48} /> : <AlertTriangle size={48} />}
           </div>
@@ -51,7 +51,7 @@ const AnalysisDashboard: React.FC<AnalysisDashboardProps> = ({ data, onCertify, 
               Generate an immutable, blockchain-anchored certificate for this content.
             </p>
           </div>
-          <button 
+          <button
             onClick={onCertify}
             disabled={isProcessing}
             className="w-full bg-neo-black text-white font-bold py-4 px-6 border-2 border-transparent hover:bg-white hover:text-neo-black hover:border-neo-black transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,0.3)] hover:shadow-neo disabled:opacity-50 disabled:cursor-not-allowed"
@@ -63,7 +63,7 @@ const AnalysisDashboard: React.FC<AnalysisDashboardProps> = ({ data, onCertify, 
 
       {/* Metrics Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        
+
         {/* Probability Chart */}
         <div className="bg-white border-4 border-neo-black p-6 shadow-neo-sm">
           <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
@@ -73,12 +73,12 @@ const AnalysisDashboard: React.FC<AnalysisDashboardProps> = ({ data, onCertify, 
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} layout="vertical" margin={{ left: 20 }}>
                 <XAxis type="number" domain={[0, 100]} hide />
-                <YAxis dataKey="name" type="category" width={60} tick={{fontFamily: 'Roboto Mono', fontSize: 12}} />
-                <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ border: '2px solid black', borderRadius: '0', boxShadow: '4px 4px 0 0 #000' }} />
+                <YAxis dataKey="name" type="category" width={60} tick={{ fontFamily: 'Roboto Mono', fontSize: 12 }} />
+                <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ border: '2px solid black', borderRadius: '0', boxShadow: '4px 4px 0 0 #000' }} />
                 <Bar dataKey="score" barSize={40}>
-                    {chartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fill} stroke="#000" strokeWidth={2} />
-                    ))}
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} stroke="#000" strokeWidth={2} />
+                  ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -87,42 +87,42 @@ const AnalysisDashboard: React.FC<AnalysisDashboardProps> = ({ data, onCertify, 
 
         {/* Technical Metrics */}
         <div className="bg-white border-4 border-neo-black p-6 shadow-neo-sm flex flex-col gap-4">
-           <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
+          <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
             <Cpu size={18} /> FORENSIC SIGNALS
           </h3>
-          
+
           <div className="grid grid-cols-1 gap-4">
             {/* Perplexity */}
             <div className="border-2 border-neo-black p-3 bg-neo-grey">
-                <div className="flex justify-between mb-1">
-                    <span className="font-mono text-xs font-bold flex items-center gap-1"><Network size={12}/> PERPLEXITY</span>
-                    <span className="font-mono text-xs">{data.perplexityScore}</span>
-                </div>
-                <div className="w-full bg-white border border-black h-2">
-                    <div className="bg-neo-black h-full" style={{ width: `${data.perplexityScore}%` }}></div>
-                </div>
+              <div className="flex justify-between mb-1">
+                <span className="font-mono text-xs font-bold flex items-center gap-1"><Network size={12} /> PERPLEXITY</span>
+                <span className="font-mono text-xs">{data.perplexityScore}</span>
+              </div>
+              <div className="w-full bg-white border border-black h-2">
+                <div className="bg-neo-black h-full" style={{ width: `${data.perplexityScore}%` }}></div>
+              </div>
             </div>
 
             {/* Burstiness */}
             <div className="border-2 border-neo-black p-3 bg-neo-grey">
-                <div className="flex justify-between mb-1">
-                    <span className="font-mono text-xs font-bold flex items-center gap-1"><Activity size={12}/> BURSTINESS</span>
-                    <span className="font-mono text-xs">{data.burstinessScore}</span>
-                </div>
-                <div className="w-full bg-white border border-black h-2">
-                    <div className="bg-neo-black h-full" style={{ width: `${data.burstinessScore}%` }}></div>
-                </div>
+              <div className="flex justify-between mb-1">
+                <span className="font-mono text-xs font-bold flex items-center gap-1"><Activity size={12} /> BURSTINESS</span>
+                <span className="font-mono text-xs">{data.burstinessScore}</span>
+              </div>
+              <div className="w-full bg-white border border-black h-2">
+                <div className="bg-neo-black h-full" style={{ width: `${data.burstinessScore}%` }}></div>
+              </div>
             </div>
 
             {/* Entropy */}
             <div className="border-2 border-neo-black p-3 bg-neo-grey">
-                <div className="flex justify-between mb-1">
-                    <span className="font-mono text-xs font-bold flex items-center gap-1"><Fingerprint size={12}/> ENTROPY</span>
-                    <span className="font-mono text-xs">{data.entropyScore}</span>
-                </div>
-                <div className="w-full bg-white border border-black h-2">
-                    <div className="bg-neo-black h-full" style={{ width: `${data.entropyScore}%` }}></div>
-                </div>
+              <div className="flex justify-between mb-1">
+                <span className="font-mono text-xs font-bold flex items-center gap-1"><Fingerprint size={12} /> ENTROPY</span>
+                <span className="font-mono text-xs">{data.entropyScore}</span>
+              </div>
+              <div className="w-full bg-white border border-black h-2">
+                <div className="bg-neo-black h-full" style={{ width: `${data.entropyScore}%` }}></div>
+              </div>
             </div>
           </div>
 
