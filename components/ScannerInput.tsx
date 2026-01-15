@@ -61,7 +61,7 @@ const ScannerInput: React.FC<ScannerInputProps> = ({ onAnalyze, isScanning }) =>
         {isScanning && <div className="scanline z-10 pointer-events-none"></div>}
 
         {/* Tabs */}
-        <div className="flex border-b-4 border-neo-black">
+        <div className="flex border-b-4 border-neo-black overflow-x-auto md:overflow-visible scrollbar-hide">
           {[
             { id: ContentType.TEXT, icon: FileCode, label: 'TEXT' },
             { id: ContentType.IMAGE, icon: FileImage, label: 'IMG' },
@@ -74,7 +74,7 @@ const ScannerInput: React.FC<ScannerInputProps> = ({ onAnalyze, isScanning }) =>
                 setActiveTab(tab.id);
                 clearInput();
               }}
-              className={`flex-1 py-4 flex flex-col items-center gap-1 font-bold font-mono text-xs sm:text-sm hover:bg-gray-100 transition-colors ${activeTab === tab.id ? 'bg-neo-black text-white hover:bg-neo-black' : 'text-neo-black'
+              className={`flex-1 min-w-[80px] md:min-w-0 py-4 flex flex-col items-center gap-1 font-bold font-mono text-xs sm:text-sm hover:bg-gray-100 transition-colors ${activeTab === tab.id ? 'bg-neo-black text-white hover:bg-neo-black' : 'text-neo-black'
                 }`}
             >
               <tab.icon size={20} />
@@ -135,11 +135,11 @@ const ScannerInput: React.FC<ScannerInputProps> = ({ onAnalyze, isScanning }) =>
           )}
 
           {/* Action Area */}
-          <div className="flex justify-end mt-4">
+          <div className="flex justify-end">
             <button
               onClick={handleScan}
               disabled={isScanning || !text}
-              className="w-full md:w-auto flex items-center justify-center gap-3 bg-neo-red text-white px-6 md:px-8 py-4 text-lg md:text-xl font-black uppercase border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-3 bg-neo-red text-white px-8 py-4 text-xl font-black uppercase border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isScanning ? (
                 <>SCANNING...</>
