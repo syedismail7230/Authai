@@ -2,19 +2,29 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Roboto+Mono:wght@400;500;700&display=swap');
 
-:root {
-  --neo-bg: #EAEAEA;
-  --neo-white: #FFFFFF;
-  --neo-black: #000000;
-  --neo-green: #00FF94;
-  --neo-red: #FF4444;
-  --neo-yellow: #FBFF00;
-  --neo-blue: #448AFF;
-  --neo-border: 2px solid #000000;
-  --neo-shadow: 4px 4px 0px #000000;
-  --neo-shadow-hover: 2px 2px 0px #000000;
-  --neo-shadow-active: 0px 0px 0px #000000;
+@theme {
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'Roboto Mono', monospace;
+
+  --color-neo-black: #000000;
+  --color-neo-white: #FFFFFF;
+  --color-neo-grey: #F5F5F5;
+  --color-neo-red: #FF0000;
+  --color-neo-blue: #0000FF;
+  --color-neo-yellow: #ffcc00;
+  --color-neo-green: #00FF00;
+
+  --shadow-neo: 8px 8px 0px 0px #000000;
+  --shadow-neo-sm: 4px 4px 0px 0px #000000;
+  --shadow-neo-hover: 2px 2px 0px 0px #000000;
 }
+
+@layer base {
+  body {
+    @apply bg-white text-neo-black;
+  }
+}
+
 
 body {
   margin: 0;
