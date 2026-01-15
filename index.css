@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Roboto+Mono:wght@400;500;700&display=swap');
 
 :root {
@@ -23,7 +27,9 @@ body {
   overflow-x: hidden;
 }
 
-code, pre, .font-mono {
+code,
+pre,
+.font-mono {
   font-family: 'Roboto Mono', monospace;
 }
 
@@ -91,14 +97,22 @@ code, pre, .font-mono {
 
 /* Animations & Effects */
 @keyframes scanline {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100%); }
+  0% {
+    transform: translateY(-100%);
+  }
+
+  100% {
+    transform: translateY(100%);
+  }
 }
 
 .crt-overlay {
   pointer-events: none;
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
   background-size: 100% 2px, 3px 100%;
   z-index: 999;
@@ -118,54 +132,146 @@ code, pre, .font-mono {
 }
 
 @keyframes blinker {
-  50% { opacity: 0; }
+  50% {
+    opacity: 0;
+  }
 }
 
 /* Typography Helpers */
-.text-neo-green { color: var(--neo-green); }
-.text-neo-red { color: var(--neo-red); }
-.text-neo-blue { color: var(--neo-blue); }
+.text-neo-green {
+  color: var(--neo-green);
+}
 
-.bg-neo-black { background-color: var(--neo-black); color: var(--neo-white); }
-.bg-neo-green { background-color: var(--neo-green); color: var(--neo-black); }
-.bg-neo-yellow { background-color: var(--neo-yellow); color: var(--neo-black); }
+.text-neo-red {
+  color: var(--neo-red);
+}
+
+.text-neo-blue {
+  color: var(--neo-blue);
+}
+
+.bg-neo-black {
+  background-color: var(--neo-black);
+  color: var(--neo-white);
+}
+
+.bg-neo-green {
+  background-color: var(--neo-green);
+  color: var(--neo-black);
+}
+
+.bg-neo-yellow {
+  background-color: var(--neo-yellow);
+  color: var(--neo-black);
+}
 
 /* Tailwind-like utils if not present */
-.flex { display: flex; }
-.flex-col { flex-direction: column; }
-.items-center { align-items: center; }
-.justify-center { justify-content: center; }
-.justify-between { justify-content: space-between; }
-.gap-4 { gap: 1rem; }
-.p-4 { padding: 1rem; }
-.p-8 { padding: 2rem; }
-.m-4 { margin: 1rem; }
-.w-full { width: 100%; }
-.h-screen { height: 100vh; }
-.relative { position: relative; }
-.absolute { position: absolute; }
-.fixed { position: fixed; }
-.z-10 { z-index: 10; }
-.z-50 { z-index: 50; }
-.font-bold { font-weight: 700; }
-.text-xl { font-size: 1.25rem; }
-.text-2xl { font-size: 1.5rem; }
-.text-4xl { font-size: 2.25rem; }
-.border-2 { border-width: 2px; }
-.rounded-none { border-radius: 0; } 
-.uppercase { text-transform: uppercase; }
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+.p-4 {
+  padding: 1rem;
+}
+
+.p-8 {
+  padding: 2rem;
+}
+
+.m-4 {
+  margin: 1rem;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.h-screen {
+  height: 100vh;
+}
+
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.fixed {
+  position: fixed;
+}
+
+.z-10 {
+  z-index: 10;
+}
+
+.z-50 {
+  z-index: 50;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.text-xl {
+  font-size: 1.25rem;
+}
+
+.text-2xl {
+  font-size: 1.5rem;
+}
+
+.text-4xl {
+  font-size: 2.25rem;
+}
+
+.border-2 {
+  border-width: 2px;
+}
+
+.rounded-none {
+  border-radius: 0;
+}
+
+.uppercase {
+  text-transform: uppercase;
+}
 
 /* Custom Scrollbar for Terminals */
 ::-webkit-scrollbar {
   width: 10px;
 }
+
 ::-webkit-scrollbar-track {
-  background: #f1f1f1; 
+  background: #f1f1f1;
   border-left: 2px solid #000;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: #000; 
+  background: #000;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: #333; 
+  background: #333;
 }
