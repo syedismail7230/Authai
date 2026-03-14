@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
-import Verification from '../models/Verification';
-import Certificate from '../models/Certificate';
+import { prisma } from '../prisma';
+import crypto from 'crypto';
 import { ethers } from 'ethers';
 
 const router = express.Router();
@@ -11,7 +11,9 @@ router.get('/:verificationId', async (req: Request, res: Response): Promise<void
     const { verificationId } = req.params;
 
     // Check if certificate already exists
-    let certificate = await Certificate.findOne({ verificationId });
+    let certificate = await prisma.certificate.findUnique({ 
+      where: { verificationId } 
+    });
 
     if (certificate) {
        res.json(certificate);
@@ -19,7 +21,9 @@ router.get('/:verificationId', async (req: Request, res: Response): Promise<void
     }
 
     // Fetch the verification data
-    const verification = await Verification.findById(verificationId);
+    const verification = await prisma.verification.findUnique({ 
+      where: { id: verificationId } 
+    });
     if (!verification) {
       res.status(404).json({ message: 'Verification record not found' });
       return;
@@ -55,20 +59,21 @@ router.get('/:verificationId', async (req: Request, res: Response): Promise<void
       txHash = '0x' + Array.from({length: 64}, () => Math.floor(Math.random() * 16).toString(16)).join('');
     }
 
-    // Create the certificate Document
-    certificate = await Certificate.create({
-      verificationId: verification._id,
-      userId: verification.userId,
-      contentHash: verification.contentHash,
-      aiScore: verification.aiScore,
-      classification: verification.classification,
-      confidence: verification.confidence,
-      txHash: txHash,
+    // Create the certificate
+    const certNumber = `CERT-${Date.now()}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+    
+    certificate = await prisma.certificate.create({
+      data: {
+        verificationId: verification.id,
+        userId: verification.userId,
+        contentHash: verification.contentHash,
+        aiScore: verification.aiScore,
+        classification: verification.classification,
+        confidence: verification.confidence,
+        txHash: txHash || undefined,
+        certificateNumber: certNumber,
+      }
     });
-
-    // Link certificate to verification
-    verification.certificateId = certificate.id;
-    await verification.save();
 
     res.json(certificate);
   } catch (error: any) {

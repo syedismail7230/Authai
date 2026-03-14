@@ -1,6 +1,6 @@
 import express, { Response } from 'express';
 import jwt from 'jsonwebtoken';
-import User from '../models/User';
+import { prisma } from '../prisma';
 import { AuthRequest, verifyToken } from '../middleware/auth';
 
 const router = express.Router();
@@ -80,18 +80,20 @@ router.post(
         return;
       }
 
-      let user = await User.findOne({ email });
+      let user = await prisma.user.findUnique({ where: { email } });
       if (!user) {
-        user = await User.create({
-          email,
-          name: email.split('@')[0],
-          wallet: 5 * 19, // 5 free certificates
-          referralCode: Math.random().toString(36).substr(2, 9),
+        user = await prisma.user.create({
+          data: {
+            email,
+            name: email.split('@')[0],
+            wallet: 5 * 19, // 5 free certificates
+            referralCode: Math.random().toString(36).substr(2, 9),
+          }
         });
       }
 
       const token = jwt.sign(
-        { userId: user._id },
+        { userId: user.id },
         process.env.JWT_SECRET || 'secret',
         { expiresIn: '7d' }
       );
@@ -101,7 +103,7 @@ router.post(
       res.json({
         token,
         user: {
-          id: user._id,
+          id: user.id,
           name: user.name,
           email: user.email,
           wallet: user.wallet,
@@ -126,29 +128,33 @@ router.post(
         return;
       }
 
-      const existingUser = await User.findOne({ email });
+      const existingUser = await prisma.user.findUnique({ where: { email } });
       if (existingUser) {
         res.status(409).json({ message: 'User already exists' });
         return;
       }
 
-      const newUser = await User.create({
-        name,
-        email,
-        wallet: 5 * 19,
-        referralCode: Math.random().toString(36).substr(2, 9),
+      const newUser = await prisma.user.create({
+        data: {
+          name,
+          email,
+          wallet: 5 * 19,
+          referralCode: Math.random().toString(36).substr(2, 9),
+        }
       });
 
       if (referralCode) {
-        const referrer = await User.findOne({ referralCode });
+        const referrer = await prisma.user.findUnique({ where: { referralCode } });
         if (referrer) {
-          referrer.wallet += 1 * 19;
-          await referrer.save();
+          await prisma.user.update({
+            where: { id: referrer.id },
+            data: { wallet: { increment: 1 * 19 } }
+          });
         }
       }
 
       const token = jwt.sign(
-        { userId: newUser._id },
+        { userId: newUser.id },
         process.env.JWT_SECRET || 'secret',
         { expiresIn: '7d' }
       );
@@ -158,7 +164,7 @@ router.post(
       res.json({
         token,
         user: {
-          id: newUser._id,
+          id: newUser.id,
           name: newUser.name,
           email: newUser.email,
           wallet: newUser.wallet,
@@ -202,37 +208,45 @@ router.post(
       const { email, name, picture, sub: googleId } = payload;
 
       // Find or create user
-      let user = await User.findOne({ email });
+      let user = await prisma.user.findUnique({ where: { email } });
 
       if (!user) {
-        user = await User.create({
-          name: name || email.split('@')[0],
-          email,
-          googleId,
-          picture,
-          wallet: 5 * 19, // 5 free certificates
-          referralCode: Math.random().toString(36).substr(2, 9),
+        user = await prisma.user.create({
+          data: {
+            name: name || email.split('@')[0],
+            email,
+            googleId,
+            picture,
+            wallet: 5 * 19, // 5 free certificates
+            referralCode: Math.random().toString(36).substr(2, 9),
+          }
         });
 
         // Handle referral logic for new users
         if (referralCode) {
-          const referrer = await User.findOne({ referralCode });
+          const referrer = await prisma.user.findUnique({ where: { referralCode } });
           if (referrer) {
-            referrer.wallet += 1 * 19;
-            await referrer.save();
+            await prisma.user.update({
+              where: { id: referrer.id },
+              data: { wallet: { increment: 1 * 19 } }
+            });
           }
         }
       } else {
         // Update existing user with Google details if missing
         if (!user.googleId || !user.picture) {
-          user.googleId = googleId;
-          if (!user.picture) user.picture = picture;
-          await user.save();
+          user = await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              googleId: user.googleId || googleId,
+              picture: user.picture || picture
+            }
+          });
         }
       }
 
       const token = jwt.sign(
-        { userId: user._id },
+        { userId: user.id },
         process.env.JWT_SECRET || 'secret',
         { expiresIn: '7d' }
       );
@@ -240,7 +254,7 @@ router.post(
       res.json({
         token,
         user: {
-          id: user._id,
+          id: user.id,
           name: user.name,
           email: user.email,
           picture: user.picture,
@@ -269,22 +283,25 @@ router.put(
         return;
       }
 
-      const user = await User.findById(userId);
+      let user = await prisma.user.findUnique({ where: { id: userId } });
       if (!user) {
         res.status(404).json({ message: 'User not found' });
         return;
       }
 
-      if (name) user.name = name;
-      if (company !== undefined) user.company = company;
-      if (role !== undefined) user.role = role;
-      if (isOnboarded !== undefined) user.isOnboarded = isOnboarded;
-
-      await user.save();
+      user = await prisma.user.update({
+        where: { id: userId },
+        data: {
+          name: name || undefined,
+          company: company !== undefined ? company : undefined,
+          role: role !== undefined ? role : undefined,
+          isOnboarded: isOnboarded !== undefined ? isOnboarded : undefined
+        }
+      });
 
       res.json({
         user: {
-          id: user._id,
+          id: user.id,
           name: user.name,
           email: user.email,
           picture: user.picture,

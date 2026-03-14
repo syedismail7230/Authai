@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(uuid())
+  name          String
+  email         String         @unique
+  googleId      String?
+  picture       String?
+  company       String?
+  role          String?        @default("user")
+  isOnboarded   Boolean        @default(false)
+  wallet        Int            @default(0)
+  referralCode  String         @unique
+  referralCount Int            @default(0)
+  verifications Verification[]
+  certificates  Certificate[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Verification {
+  id             String       @id @default(uuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id])
+  contentType    String
+  contentHash    String
+  aiScore        Float
+  classification String
+  confidence     Float
+  fileUrl        String?
+  certificate    Certificate?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Certificate {
+  id                String        @id @default(uuid())
+  verificationId    String        @unique
+  verification      Verification  @relation(fields: [verificationId], references: [id])
+  userId            String
+  user              User          @relation(fields: [userId], references: [id])
+  contentHash       String
+  aiScore           Float
+  classification    String
+  confidence        Float
+  certificateNumber String        @unique
+  pdfUrl            String?
+  txHash            String?
+  verifiedAt        DateTime      @default(now())
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+}

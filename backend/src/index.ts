@@ -1,13 +1,14 @@
 import express from 'express';
 import cors from 'cors';
-import mongoose from 'mongoose';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth';
 import verificationRoutes from './routes/verification';
 import walletRoutes from './routes/wallet';
 import adminRoutes from './routes/admin';
+import certificateRoutes from './routes/certificate';
 import { verifyToken } from './middleware/auth';
+import { prisma } from './prisma';
 
 dotenv.config();
 
@@ -20,22 +21,18 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// MongoDB Connection
+// Database Connection Check
 const connectDB = async () => {
   try {
-    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/authai';
-    await mongoose.connect(mongoUri);
-    console.log('✅ MongoDB connected successfully');
+    await prisma.$connect();
+    console.log('✅ Prisma connected to PostgreSQL (Neon) successfully');
   } catch (err: any) {
-    console.error('❌ MongoDB connection error:', err.message);
-    // Retry connection after 5 seconds
+    console.error('❌ Database connection error:', err.message);
     setTimeout(connectDB, 5000);
   }
 };
 
 connectDB();
-
-import certificateRoutes from './routes/certificate';
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -45,12 +42,22 @@ app.use('/api/admin', verifyToken, adminRoutes);
 app.use('/api/certificate', certificateRoutes);
 
 // Health check
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-  });
+app.get('/health', async (req, res) => {
+  try {
+    // Simple query to verify connection
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      database: 'connected',
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      timestamp: new Date().toISOString(),
+      database: 'disconnected',
+    });
+  }
 });
 
 // Error handler

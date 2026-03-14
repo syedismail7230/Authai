@@ -3,8 +3,7 @@ import multer from 'multer';
 import crypto from 'crypto';
 import axios from 'axios';
 import { AuthRequest, verifyToken } from '../middleware/auth';
-import Verification from '../models/Verification';
-import User from '../models/User';
+import { prisma } from '../prisma';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
@@ -20,7 +19,7 @@ router.post('/text', verifyToken, async (req: AuthRequest, res: Response): Promi
       return;
     }
 
-    const user = await User.findById(userId);
+    const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user || user.wallet < 19) {
       res.status(402).json({ message: 'Insufficient credits. Please top up your wallet.' });
       return;
@@ -32,21 +31,25 @@ router.post('/text', verifyToken, async (req: AuthRequest, res: Response): Promi
     });
     const { aiScore, classification, confidence } = aiResponse.data;
 
-    const verification = await Verification.create({
-      userId,
-      contentType: 'text',
-      contentHash: crypto.createHash('sha256').update(text).digest('hex'),
-      aiScore,
-      classification,
-      confidence,
+    const verification = await prisma.verification.create({
+      data: {
+        userId,
+        contentType: 'text',
+        contentHash: crypto.createHash('sha256').update(text).digest('hex'),
+        aiScore,
+        classification,
+        confidence,
+      }
     });
 
     // Deduct wallet
-    user.wallet -= 19;
-    await user.save();
+    await prisma.user.update({
+      where: { id: userId },
+      data: { wallet: { decrement: 19 } }
+    });
 
     res.json({
-      id: verification._id,
+      id: verification.id,
       aiScore,
       classification,
       confidence,
@@ -70,7 +73,7 @@ router.post('/file', verifyToken, upload.single('file'), async (req: AuthRequest
       return;
     }
 
-    const user = await User.findById(userId);
+    const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user || user.wallet < 19) {
       res.status(402).json({ message: 'Insufficient credits. Please top up your wallet.' });
       return;
@@ -87,22 +90,26 @@ router.post('/file', verifyToken, upload.single('file'), async (req: AuthRequest
 
     const { aiScore, classification, confidence } = aiResponse.data;
 
-    const verification = await Verification.create({
-      userId,
-      contentType: file.mimetype,
-      contentHash: crypto.createHash('sha256').update(file.buffer).digest('hex'),
-      aiScore,
-      classification,
-      confidence,
-      fileUrl: `uploads/${file.originalname}`,
+    const verification = await prisma.verification.create({
+      data: {
+        userId,
+        contentType: file.mimetype,
+        contentHash: crypto.createHash('sha256').update(file.buffer).digest('hex'),
+        aiScore,
+        classification,
+        confidence,
+        fileUrl: `uploads/${file.originalname}`,
+      }
     });
 
     // Deduct wallet
-    user.wallet -= 19;
-    await user.save();
+    await prisma.user.update({
+      where: { id: userId },
+      data: { wallet: { decrement: 19 } }
+    });
 
     res.json({
-      id: verification._id,
+      id: verification.id,
       aiScore,
       classification,
       confidence,

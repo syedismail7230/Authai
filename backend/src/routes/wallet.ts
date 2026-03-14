@@ -1,6 +1,6 @@
 import express, { Response } from 'express';
 import { AuthRequest, verifyToken } from '../middleware/auth';
-import User from '../models/User';
+import { prisma } from '../prisma';
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 
@@ -15,7 +15,7 @@ const razorpay = new Razorpay({
 router.get('/balance', verifyToken, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.userId!;
-    const user = await User.findById(userId);
+    const user = await prisma.user.findUnique({ where: { id: userId } });
 
     if (!user) {
       res.status(404).json({ message: 'User not found' });
@@ -71,7 +71,10 @@ router.post('/verify-payment', verifyToken, async (req: AuthRequest, res: Respon
 
     if (isAuthentic) {
       // Payment is authentic, add to wallet
-      const user = await User.findByIdAndUpdate(userId, { $inc: { wallet: amountAdded } }, { new: true });
+      const user = await prisma.user.update({
+        where: { id: userId },
+        data: { wallet: { increment: amountAdded } }
+      });
       res.json({ success: true, balance: user?.wallet, message: 'Payment verified and wallet updated' });
     } else {
       res.status(400).json({ success: false, message: 'Invalid signature' });
