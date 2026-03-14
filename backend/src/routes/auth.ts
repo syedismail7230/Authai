@@ -1,6 +1,7 @@
 import express, { Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../prisma';
+import axios from 'axios';
 import { AuthRequest, verifyToken } from '../middleware/auth';
 
 const router = express.Router();
