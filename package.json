@@ -7,7 +7,16 @@
     "build": "npm install --prefix frontend && npm run build --prefix frontend && mkdir -p dist && cp -r frontend/out/* dist/",
     "install-all": "npm install --prefix backend && npm install --prefix frontend && cd ai-service && pip install -r requirements.txt"
   },
+  "dependencies": {
+    "hono": "^4.12.7",
+    "@prisma/client": "^5.21.0",
+    "@prisma/adapter-neon": "^7.5.0",
+    "@neondatabase/serverless": "^1.0.2",
+    "ethers": "^6.16.0",
+    "axios": "^1.5.0"
+  },
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "concurrently": "^9.2.1",
+    "prisma": "^5.21.0"
   }
 }

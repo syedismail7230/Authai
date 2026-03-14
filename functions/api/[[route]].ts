@@ -1,7 +1,8 @@
 import { Hono } from 'hono'
 import { handle } from 'hono/cloudflare-pages'
 import { jwt, sign, verify } from 'hono/jwt'
-import { getPrisma } from '../../lib/prisma-edge'
+import { cors } from 'hono/cors'
+import { getPrisma } from '../../frontend/lib/prisma-edge'
 import { ethers } from 'ethers'
 
 type Bindings = {
@@ -20,6 +21,8 @@ type Variables = {
 }
 
 const app = new Hono<{ Bindings: Bindings, Variables: Variables }>().basePath('/api')
+
+app.use('*', cors())
 
 // --- UTILS ---
 const authMiddleware = async (c: any, next: any) => {
