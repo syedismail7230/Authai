@@ -43,15 +43,19 @@ router.post(
         expiry: Date.now() + 10 * 60 * 1000, // 10 minutes
       });
 
-      if (process.env.NODE_ENV === 'development' && transporter) {
-        const info = await transporter.sendMail({
-          from: '"AuthAI Admin" <admin@authai.pro>',
-          to: email,
-          subject: "AuthAI Verification PIN",
-          text: `Your AuthAI login PIN is: ${otpCode}`,
-          html: `<b>Your AuthAI login PIN is: ${otpCode}</b>`,
-        });
-        console.log(`[DEV EMAIL SENT] Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+      if (transporter) {
+        try {
+          await transporter.sendMail({
+            from: `"AuthAI" <${process.env.SMTP_USER}>`,
+            to: email,
+            subject: "AuthAI Verification PIN",
+            text: `Your AuthAI login PIN is: ${otpCode}`,
+            html: `<b>Your AuthAI login PIN is: ${otpCode}</b>`,
+          });
+          console.log(`✅ OTP Email sent to ${email}`);
+        } catch (mailError: any) {
+          console.error('❌ Failed to send OTP email:', mailError.message);
+        }
       }
 
       res.json({ message: 'OTP sent successfully', email });
