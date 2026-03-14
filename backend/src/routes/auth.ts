@@ -43,19 +43,22 @@ router.post(
         expiry: Date.now() + 10 * 60 * 1000, // 10 minutes
       });
 
-      if (transporter) {
-        try {
-          await transporter.sendMail({
-            from: `"AuthAI" <${process.env.SMTP_USER}>`,
-            to: email,
-            subject: "AuthAI Verification PIN",
-            text: `Your AuthAI login PIN is: ${otpCode}`,
-            html: `<b>Your AuthAI login PIN is: ${otpCode}</b>`,
-          });
-          console.log(`✅ OTP Email sent to ${email}`);
-        } catch (mailError: any) {
-          console.error('❌ Failed to send OTP email:', mailError.message);
-        }
+      try {
+        await axios.post('https://api.brevo.com/v3/smtp/email', {
+          sender: { name: "AuthAI", email: "syedismailart@gmail.com" }, // Using user's verified email
+          to: [{ email }],
+          subject: "AuthAI Verification PIN",
+          textContent: `Your AuthAI login PIN is: ${otpCode}`,
+          htmlContent: `<b>Your AuthAI login PIN is: ${otpCode}</b>`,
+        }, {
+          headers: {
+            'api-key': process.env.SMTP_PASS || 'yhkQOGtFvYE9CbnV',
+            'Content-Type': 'application/json',
+          }
+        });
+        console.log(`✅ Brevo API: OTP Email sent to ${email}`);
+      } catch (mailError: any) {
+        console.error('❌ Brevo API Error:', mailError.response?.data || mailError.message);
       }
 
       res.json({ message: 'OTP sent successfully', email });
