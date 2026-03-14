@@ -4,6 +4,6 @@ import { Pool } from '@neondatabase/serverless'
 
 export const getPrisma = (databaseUrl: string) => {
   const pool = new Pool({ connectionString: databaseUrl })
-  const adapter = new PrismaNeon(pool)
+  const adapter = new PrismaNeon(pool as any)
   return new PrismaClient({ adapter: adapter as any })
 }
