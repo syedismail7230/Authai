@@ -33,7 +33,7 @@ export default function Onboarding() {
       if (!token) throw new Error('NO_TOKEN_FOUND');
 
       const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/auth/profile`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://authai.pro'}/api/auth/profile`,
         { ...formData, isOnboarded: true },
         { headers: { Authorization: `Bearer ${token}` } }
       );
