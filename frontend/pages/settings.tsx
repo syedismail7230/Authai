@@ -39,7 +39,7 @@ export default function Settings() {
       if (!token) throw new Error('No token found');
 
       const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/auth/profile`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://authai.pro'}/api/auth/profile`,
         formData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -70,7 +70,7 @@ export default function Settings() {
           <a onClick={() => router.push('/verify')} className="hover:underline cursor-pointer">SCAN</a>
           <a onClick={() => router.push('/dashboard')} className="hover:underline cursor-pointer">DASHBOARD</a>
           {user?.role === 'admin' && (
-             <a onClick={() => router.push('/admin')} className="hover:underline cursor-pointer text-red-600">ADMIN</a>
+            <a onClick={() => router.push('/admin')} className="hover:underline cursor-pointer text-red-600">ADMIN</a>
           )}
           <div className="border-2 border-black px-3 py-1 shadow-[4px_4px_0_0_#000] bg-white text-xs font-mono uppercase font-bold">
             &gt;_ SYS: ONLINE
@@ -84,12 +84,12 @@ export default function Settings() {
 
       <main className="flex-1 w-full max-w-4xl mx-auto py-12 px-4 flex flex-col">
         <h1 className="text-4xl font-black uppercase tracking-tighter mb-8 bg-black text-white inline-block px-4 py-2 self-start border-4 border-black shadow-[6px_6px_0_0_rgba(0,0,0,0.5)]">
-            ⚙️ SYS_CONFIG
+          ⚙️ SYS_CONFIG
         </h1>
 
         <div className="bg-white border-4 border-black shadow-[12px_12px_0_0_#000] p-8 mb-12 relative">
           <h2 className="text-2xl font-black mb-6 uppercase tracking-widest border-b-4 border-black pb-4">ID_PROFILES</h2>
-          
+
           {message && (
             <div className={`mb-6 p-4 border-2 border-black font-mono text-sm font-bold uppercase tracking-widest ${message.includes('UPDATED') ? 'bg-[#ddffdd] text-green-800' : 'bg-[#ffdddd] text-red-800'}`}>
               &gt; {message}
@@ -103,33 +103,33 @@ export default function Settings() {
             </div>
             <div>
               <label className="block text-xs font-black uppercase tracking-widest mb-2 font-mono">SYS_USR_NAME</label>
-              <input 
-                type="text" 
-                value={formData.name} 
-                onChange={e => setFormData({...formData, name: e.target.value})} 
-                className="w-full p-4 border-2 border-black bg-[#f9f9f9] focus:outline-none focus:bg-white focus:border-black font-mono text-sm uppercase" 
+              <input
+                type="text"
+                value={formData.name}
+                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                className="w-full p-4 border-2 border-black bg-[#f9f9f9] focus:outline-none focus:bg-white focus:border-black font-mono text-sm uppercase"
               />
             </div>
             <div>
               <label className="block text-xs font-black uppercase tracking-widest mb-2 font-mono">SYS_ORGANIZATION</label>
-              <input 
-                type="text" 
-                value={formData.company} 
-                onChange={e => setFormData({...formData, company: e.target.value})} 
-                className="w-full p-4 border-2 border-black bg-[#f9f9f9] focus:outline-none focus:bg-white focus:border-black font-mono text-sm uppercase" 
+              <input
+                type="text"
+                value={formData.company}
+                onChange={e => setFormData({ ...formData, company: e.target.value })}
+                className="w-full p-4 border-2 border-black bg-[#f9f9f9] focus:outline-none focus:bg-white focus:border-black font-mono text-sm uppercase"
               />
             </div>
             <div>
               <label className="block text-xs font-black uppercase tracking-widest mb-2 font-mono">SYS_USER_ROLE</label>
-              <input 
-                type="text" 
-                value={formData.role} 
-                onChange={e => setFormData({...formData, role: e.target.value})} 
-                className="w-full p-4 border-2 border-black bg-[#f9f9f9] focus:outline-none focus:bg-white focus:border-black font-mono text-sm uppercase" 
+              <input
+                type="text"
+                value={formData.role}
+                onChange={e => setFormData({ ...formData, role: e.target.value })}
+                className="w-full p-4 border-2 border-black bg-[#f9f9f9] focus:outline-none focus:bg-white focus:border-black font-mono text-sm uppercase"
               />
             </div>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={loading}
               className="mt-8 w-full py-4 border-4 border-black bg-black text-white font-black uppercase tracking-widest hover:bg-white hover:text-black transition-colors disabled:opacity-50 text-sm shadow-[4px_4px_0_0_#000] hover:shadow-[4px_4px_0_0_rgba(0,0,0,0.2)]"
             >

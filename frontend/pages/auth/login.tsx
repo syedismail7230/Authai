@@ -18,7 +18,7 @@ export default function Login() {
     setLoading(true);
     setError('');
     try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/auth/send-otp`, { email });
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://authai.pro'}/api/auth/send-otp`, { email });
       setShowOtp(true);
     } catch (err: any) {
       setError(err.response?.data?.message || 'FAILED TO INITIATE SEQUENCE');
@@ -32,7 +32,7 @@ export default function Login() {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/auth/verify-otp`, {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://authai.pro'}/api/auth/verify-otp`, {
         email,
         otp,
       });
@@ -54,7 +54,7 @@ export default function Login() {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/auth/google`, {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://authai.pro'}/api/auth/google`, {
         credential: credentialResponse.credential,
       });
       const { token, user } = response.data;
@@ -69,7 +69,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-[#f3f4f6] flex flex-col font-sans text-black selection:bg-black selection:text-white items-center justify-center p-4">
-      
+
       <div className="w-full max-w-md bg-white border-4 border-black shadow-[12px_12px_0_0_rgba(0,0,0,1)] p-8">
         <h1 className="text-4xl font-black uppercase tracking-tighter mb-2 text-center">AUTHAI.PRO</h1>
         <div className="w-full h-1 bg-black mb-6"></div>
@@ -122,7 +122,7 @@ export default function Login() {
         {!showOtp && (
           <div className="mt-8 pt-6 border-t-2 border-dashed border-gray-300">
             <p className="text-center font-mono text-xs uppercase text-gray-500 mb-4">&gt; ALTERNATIVE_PROTOCOL</p>
-            
+
             <div className="flex justify-center w-full border-2 border-black p-2 bg-[#f9f9f9]">
               {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ? (
                 <GoogleLogin
