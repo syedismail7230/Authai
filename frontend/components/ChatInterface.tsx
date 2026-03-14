@@ -89,7 +89,7 @@ export default function ChatInterface() {
     try {
       const token = localStorage.getItem('authToken');
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/verify/file`,
+        '/api/verify/file',
         formData,
         {
           headers: {
@@ -154,7 +154,7 @@ export default function ChatInterface() {
     try {
       const token = localStorage.getItem('authToken');
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/verify/text`,
+        '/api/verify/text',
         { text: userMessage },
         {
           headers: { Authorization: `Bearer ${token}` },

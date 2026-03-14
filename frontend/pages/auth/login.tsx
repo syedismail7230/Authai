@@ -18,7 +18,7 @@ export default function Login() {
     setLoading(true);
     setError('');
     try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://authai.pro'}/api/auth/send-otp`, { email });
+      await axios.post('/api/auth/send-otp', { email });
       setShowOtp(true);
     } catch (err: any) {
       setError(err.response?.data?.message || 'FAILED TO INITIATE SEQUENCE');
@@ -32,7 +32,7 @@ export default function Login() {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://authai.pro'}/api/auth/verify-otp`, {
+      const response = await axios.post('/api/auth/verify-otp', {
         email,
         otp,
       });
@@ -54,7 +54,7 @@ export default function Login() {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://authai.pro'}/api/auth/google`, {
+      const response = await axios.post('/api/auth/google', {
         credential: credentialResponse.credential,
       });
       const { token, user } = response.data;

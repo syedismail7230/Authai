@@ -29,7 +29,7 @@ export default function PaymentModal({ onClose }: Props) {
 
       // Create Razorpay order
       const { data } = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/wallet/create-order`,
+        '/api/wallet/create-order',
         { amount: amount / 100 }, // Send Rupee amount
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -48,7 +48,7 @@ export default function PaymentModal({ onClose }: Props) {
           try {
             // Verify payment
             await axios.post(
-              `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/wallet/verify-payment`,
+              '/api/wallet/verify-payment',
               {
                 razorpay_order_id: data.id,
                 razorpay_payment_id: response.razorpay_payment_id,
@@ -62,7 +62,7 @@ export default function PaymentModal({ onClose }: Props) {
 
             // Refresh user balance
             const userResponse = await axios.get(
-              `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/auth/profile`,
+              '/api/auth/profile',
               {
                 headers: { Authorization: `Bearer ${token}` },
               }

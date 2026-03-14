@@ -23,7 +23,7 @@ export default function CertificateModal({ verificationId, onClose }: Certificat
       setLoading(true);
       const token = localStorage.getItem('authToken');
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/certificate/${verificationId}`,
+        `/api/certificate/${verificationId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setCertificateData(response.data);
@@ -122,7 +122,7 @@ export default function CertificateModal({ verificationId, onClose }: Certificat
 
                 <div className="flex justify-center mb-8">
                   <QRCode
-                    value={`${process.env.NEXT_PUBLIC_API_URL}/verify/${verificationId}`}
+                    value={typeof window !== 'undefined' ? `${window.location.origin}/verify/${verificationId}` : ''}
                     size={150}
                   />
                 </div>

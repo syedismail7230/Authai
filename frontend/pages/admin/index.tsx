@@ -29,9 +29,9 @@ export default function AdminDashboard() {
       const headers = { Authorization: `Bearer ${token}` };
 
       const [statsRes, usersRes, logsRes] = await Promise.all([
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/admin/stats`, { headers }),
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/admin/users`, { headers }),
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/admin/logs`, { headers }),
+        axios.get('/api/admin/stats', { headers }),
+        axios.get('/api/admin/users', { headers }),
+        axios.get('/api/admin/logs', { headers }),
       ]);
 
       setStats(statsRes.data);

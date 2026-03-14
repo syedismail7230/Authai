@@ -39,7 +39,7 @@ export default function Settings() {
       if (!token) throw new Error('No token found');
 
       const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://authai.pro'}/api/auth/profile`,
+        '/api/auth/profile',
         formData,
         { headers: { Authorization: `Bearer ${token}` } }
       );

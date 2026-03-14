@@ -18,7 +18,7 @@ export default function Signup() {
     setLoading(true);
     setError('');
     try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://authai.pro'}/api/auth/send-otp`, {
+      await axios.post('/api/auth/send-otp', {
         email: formData.email,
       });
       setShowOtp(true);
@@ -34,7 +34,7 @@ export default function Signup() {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://authai.pro'}/api/auth/register`, {
+      const response = await axios.post('/api/auth/register', {
         name: formData.name,
         email: formData.email,
         otp,
@@ -58,7 +58,7 @@ export default function Signup() {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://authai.pro'}/api/auth/google`, {
+      const response = await axios.post('/api/auth/google', {
         credential: credentialResponse.credential,
         referralCode: formData.referralCode || undefined,
       });
