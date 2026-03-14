@@ -1,0 +1,131 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Roboto+Mono:wght@400;500;700&display=swap');
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'Roboto Mono', monospace;
+
+  /* Redesign Palette */
+  --color-neo-bg: #F3F4F6;
+  /* Off-white background */
+  --color-neo-white: #FFFFFF;
+  --color-neo-black: #000000;
+
+  /* Accents */
+  --color-neo-pink: #FDA4AF;
+  /* Pastel Pink for primary actions */
+  --color-neo-yellow: #FACC15;
+  /* Vibrant Yellow for highlights */
+  --color-neo-green: #4ADE80;
+  /* Success/Safe */
+  --color-neo-rose: #FB7185;
+  /* Darker pink for hover */
+
+  /* Shadows */
+  --shadow-neo: 8px 8px 0px 0px #000000;
+  --shadow-neo-card: 6px 6px 0px 0px #000000;
+  --shadow-neo-sm: 4px 4px 0px 0px #000000;
+  --shadow-neo-none: 0px 0px 0px 0px #000000;
+}
+
+@layer base {
+  body {
+    @apply bg-neo-bg text-neo-black antialiased;
+  }
+}
+
+/* Base Styles */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-neo-bg);
+  color: var(--color-neo-black);
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Neo-Brutalist Components */
+
+/* Main Card Container */
+.neo-card {
+  @apply bg-white border-4 border-black shadow-neo-card transition-all duration-200;
+}
+
+.neo-card:hover {
+  @apply shadow-neo-sm translate-x-[2px] translate-y-[2px];
+}
+
+/* Primary Action Button (Pink) */
+.neo-btn-primary {
+  @apply flex items-center justify-center gap-2 px-6 py-3 font-black text-lg uppercase tracking-wide;
+  @apply bg-neo-pink border-4 border-black text-black shadow-neo transition-all duration-200;
+}
+
+.neo-btn-primary:hover:not(:disabled) {
+  @apply bg-neo-rose translate-x-[4px] translate-y-[4px] shadow-neo-sm;
+}
+
+.neo-btn-primary:active:not(:disabled) {
+  @apply translate-x-[6px] translate-y-[6px] shadow-none;
+}
+
+.neo-btn-primary:disabled {
+  @apply opacity-50 cursor-not-allowed shadow-neo;
+}
+
+/* Secondary Button (White/Black) */
+.neo-btn-secondary {
+  @apply flex items-center justify-center gap-2 px-4 py-2 font-bold uppercase tracking-wide;
+  @apply bg-white border-2 border-black text-black shadow-neo-sm transition-all duration-200;
+}
+
+.neo-btn-secondary:hover {
+  @apply bg-gray-50 translate-x-[2px] translate-y-[2px] shadow-none;
+}
+
+/* Input Fields */
+.neo-input {
+  @apply w-full p-4 bg-gray-50 border-2 border-black font-mono text-sm placeholder-gray-500 outline-none transition-colors;
+}
+
+.neo-input:focus {
+  @apply bg-white border-black ring-0 shadow-neo-sm;
+}
+
+/* Tab System */
+.neo-tab {
+  @apply flex-1 py-3 font-bold border-2 border-black border-b-0 text-center uppercase tracking-wide transition-colors;
+}
+
+.neo-tab.active {
+  @apply bg-black text-white;
+}
+
+.neo-tab.inactive {
+  @apply bg-gray-200 text-gray-500 hover:bg-gray-300;
+}
+
+/* Modal Overlay */
+.neo-modal-overlay {
+  @apply fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #E5E7EB;
+  border-left: 2px solid #000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #000;
+  border: 2px solid #E5E7EB;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #333;
+}
